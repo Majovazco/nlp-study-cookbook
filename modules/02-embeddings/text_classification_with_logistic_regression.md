@@ -124,3 +124,4 @@ Softmax recibe $[11.5, -0.9, -2.3]$ y nos da las probabilidades:
 | **$w_k$** | Los pesos aprendidos para cada categoría. | Las filas horizontales de colores ($w_1, w_2, w_3$). |
 | **$w_k \cdot h + b_k$** | El puntaje bruto o afinidad con esa clase. | Los círculos azules antes de Softmax. |
 | **Softmax** | La función que convierte puntos en porcentaje ($0$ a $1$, suma $100\%$). | El bloque que entrega las barritas finales de probabilidad. |
+## El cambio de nombre por el signo:Con signo positivo ($\max$): Se le llama Log-Likelihood (o Máxima Verosimilitud) porque buscas maximizar la probabilidad de acertar.   Con signo negativo ($\min$): Se le llama Log-Loss o Cross-Entropy porque buscas minimizar el error
