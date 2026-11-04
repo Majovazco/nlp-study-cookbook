@@ -125,3 +125,19 @@ Softmax recibe $[11.5, -0.9, -2.3]$ y nos da las probabilidades:
 | **$w_k \cdot h + b_k$** | El puntaje bruto o afinidad con esa clase. | Los círculos azules antes de Softmax. |
 | **Softmax** | La función que convierte puntos en porcentaje ($0$ a $1$, suma $100\%$). | El bloque que entrega las barritas finales de probabilidad. |
 ## El cambio de nombre por el signo:Con signo positivo ($\max$): Se le llama Log-Likelihood (o Máxima Verosimilitud) porque buscas maximizar la probabilidad de acertar.   Con signo negativo ($\min$): Se le llama Log-Loss o Cross-Entropy porque buscas minimizar el error
+---
+
+## El gran salto: ¿Por qué dejar de "contar" palabras?
+
+> **La duda clave:** *¿Creamos una red lo suficientemente buena para decir "ya no vamos a contar, ya sabemos el contexto"?*
+
+**Exactamente.** Ese fue el cambio de paradigma histórico en el procesamiento de lenguaje natural (NLP):
+
+* **El problema de contar (Bag of Words):**  
+  Si comparabas:
+  * *"La comida no estuvo nada rica, el servicio fue pésimo"*  
+  * *"La comida no estuvo mal, el servicio fue rico"*  
+  Un contador de frecuencias veía prácticamente el mismo vocabulario y se confundía con facilidad, ignorando por completo el orden y la negación.
+
+* **La solución de Deep Learning:**  
+  Se construyeron arquitecturas neuronales que leen en secuencia y consideran la posición y la relación contextual entre palabras. El sistema ya no ve frecuencias numéricas aisladas ($1, 1, 1$), sino que proyecta las palabras como vectores cargados de significado y analiza cómo interactúan entre sí (por ejemplo, cómo un *"no"* altera por completo la carga semántica del adjetivo siguiente).
