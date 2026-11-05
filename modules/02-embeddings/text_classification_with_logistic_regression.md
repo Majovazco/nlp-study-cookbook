@@ -141,3 +141,53 @@ Softmax recibe $[11.5, -0.9, -2.3]$ y nos da las probabilidades:
 
 * **La solución de Deep Learning:**  
   Se construyeron arquitecturas neuronales que leen en secuencia y consideran la posición y la relación contextual entre palabras. El sistema ya no ve frecuencias numéricas aisladas ($1, 1, 1$), sino que proyecta las palabras como vectores cargados de significado y analiza cómo interactúan entre sí (por ejemplo, cómo un *"no"* altera por completo la carga semántica del adjetivo siguiente).
+  ---
+
+# Transición a Generación de Texto y Transformers
+
+## 1. Repaso: ¿Qué resolvimos con la Clasificación de Texto?
+
+* **El objetivo central:** Recibir un texto completo y asignarle una única categoría o etiqueta (por ejemplo: saber si una reseña es positiva o negativa, o si un texto habla de belleza, deportes o tecnología).
+* **El pipeline clásico:** Antes de Deep Learning, contabas palabras a mano (*Bag of Words* / *TF-IDF*) para armar un vector $h$, y luego una Regresión Logística (capa lineal + Softmax) calculaba la probabilidad de cada categoría evaluando el error con *Cross-Entropy*.
+* **El cambio con Deep Learning:** En lugar de contar palabras a ciegas ($1, 1, 1$), una red neuronal toma vectores con significado semántico previo (*embeddings*) y aprende por sí misma a resumir la frase en el vector $h$, manteniendo al final la misma regresión logística para decidir la clase.
+
+---
+
+## 2. El puente intermedio: Las RNN antes de los Transformers
+
+* **Para qué servían:** Las Redes Neuronales Recurrentes (*Recurrent Neural Networks* - RNN) fueron el primer intento exitoso de procesar secuencias palabra por palabra en orden, arrastrando un estado oculto o "memoria" paso a paso para que el modelo mantuviera el contexto de lo leído previamente.
+* **Por qué quedaron obsoletas en la práctica:**
+  * **Procesamiento estrictamente secuencial:** No se pueden paralelizar eficientemente en GPUs modernas, ya que para procesar el token $t$ necesitas obligatoriamente haber terminado el token $t-1$.
+  * **Desvanecimiento del gradiente (*vanishing gradient*):** Sufren de pérdida de memoria crítica cuando los textos son medianamente largos.
+* **Su valor pedagógico:** Sirven para entender las limitaciones del procesamiento secuencial que los **Transformers** resolvieron al procesar todos los tokens en paralelo mediante mecanismos de auto-atención (*Self-Attention*).
+
+---
+
+## 3. Nuevo paradigma: De clasificar a generar (Seq2Seq y Model Loss)
+
+Esta etapa aborda cómo se entrena y se penaliza el error en tareas de generación de texto secuencia a secuencia (*Seq2Seq*), como la traducción automática:
+
+### A. Cambio de tarea
+Ya no buscamos encasillar un texto entero en una clase predefinida. Ahora el objetivo es **predecir el siguiente token correcto en una secuencia**.
+
+### B. Un paso de entrenamiento en Seq2Seq
+1. **Entrada de contexto:** El modelo recibe la oración fuente (por ejemplo, en ruso) y los tokens que ya se han generado hasta ese instante: `"I saw a"`.
+2. **Objetivo del paso:** Predecir con precisión la palabra inmediata siguiente: `"cat"`.
+
+### C. Evaluación con Cross-Entropy
+El mecanismo matemático de penalización sigue siendo el mismo que en clasificación:
+
+1. El modelo emite una distribución de probabilidades $q$ sobre todo el vocabulario disponible mediante Softmax.
+2. El objetivo real (*Target*) es una distribución $p$ (un vector *one-hot*) donde únicamente el token correcto (`"cat"`) tiene valor $1$ y todos los demás valen $0$:
+   $$p(\text{"cat"}) = 1, \quad p(\text{otra}) = 0$$
+3. La función de pérdida de entropía cruzada (*Cross-Entropy Loss*) se calcula como:
+   $$\mathcal{L} = - \sum_{w \in V} p(w) \log q(w) = - \log q(\text{"cat"})$$
+   *(Donde $V$ es la totalidad del vocabulario).*
+
+### D. Dinámica de ajuste por gradiente
+* Si la probabilidad $q(\text{"cat"})$ es baja, la pérdida $\mathcal{L}$ aumenta drásticamente.
+* La retropropagación (*backpropagation*) calcula los gradientes para obligar a los pesos de la red a:
+  * **Incrementar** la probabilidad asignada a `"cat"`.
+  * **Reducir** la probabilidad asignada a todas las demás opciones incorrectas del vocabulario.
+
+> **Conclusión conceptual:** Generar o traducir texto mediante redes neuronales no requiere una matemática nueva e incomprensible: consiste en aplicar la misma función de **Cross-Entropy** de la clasificación básica, repetida token por token en cada paso de la generación.
