@@ -30,3 +30,17 @@ logits = model(source_seq, target_inputs)
 loss_fn = nn.CrossEntropyLoss()
 J = loss_fn(logits, target_labels)
 J.backward()
+
+## Fundamentos del Transformer: De RNNs a Attention
+
+### 1. Motivación
+* **Límite de las RNNs:** Procesamiento estrictamente secuencial ($O(N)$ timesteps) que no paraleliza en GPU y crea un cuello de botella al comprimir todo en un único vector $h$[cite: 1, 5].
+* **Transformer (2017):** Reemplaza la recurrencia por mecanismos puros de atención procesados simultáneamente en paralelo[cite: 1, 2].
+
+### 2. Mecanismos Clave
+* **Self-Attention ($Q, K, V$):** Cada token proyecta tres vectores (*Query*, *Key*, *Value*)[cite: 8]. La atención pondera el contenido ($V$) según la afinidad semántica entre búsqueda ($Q$) y etiquetas ($K$)[cite: 8]:
+  $$\text{Attention}(Q, K, V) = \text{softmax}\left(\frac{QK^T}{\sqrt{d_k}}\right)V$$
+* **Multi-Head Attention:** Divide las proyecciones en múltiples cabezales independientes para capturar simultáneamente relaciones sintácticas, correferencias y dependencias semánticas[cite: 12, 13].
+* **Masked Self-Attention (Decoder):** Aplica una máscara con $-\infty$ a posiciones futuras para evitar filtración de información durante el entrenamiento autorregresivo[cite: 10].
+* **Encoder-Decoder (Cross-Attention):** El Decoder consulta las representaciones contextualizadas del Encoder ($Q$ desde el Decoder, $K$ y $V$ desde el Encoder)[cite: 3].
+* **Positional Encoding:** Suma coordenadas a los embeddings para dotar de noción posicional a la secuencia procesada en paralelo[cite: 4].
