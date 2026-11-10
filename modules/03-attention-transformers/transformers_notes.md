@@ -44,3 +44,45 @@ J.backward()
 * **Masked Self-Attention (Decoder):** Aplica una máscara con $-\infty$ a posiciones futuras para evitar filtración de información durante el entrenamiento autorregresivo[cite: 10].
 * **Encoder-Decoder (Cross-Attention):** El Decoder consulta las representaciones contextualizadas del Encoder ($Q$ desde el Decoder, $K$ y $V$ desde el Encoder)[cite: 3].
 * **Positional Encoding:** Suma coordenadas a los embeddings para dotar de noción posicional a la secuencia procesada en paralelo[cite: 4].
+# Aspect-Based Sentiment Classification with Transformers (TripAdvisor Reviews)
+
+Implementación y evaluación comparativa de modelos basados en arquitectura Transformer para clasificación de sentimiento por aspectos (*Aspect-Based Sentiment Analysis*) sobre reseñas de hoteles en inglés.
+
+---
+
+## 📌 Resumen de la Práctica
+
+En esta práctica se evaluaron 4 etapas clave de fine-tuning y optimización:
+
+1. **Preparación y Mapeo de Datos:**
+   - **Aspecto objetivo:** `cleanliness` (limpieza), filtrando registros sin calificación.
+   - **Discretización (3 clases):** Mapeo de escala 1–5 a polaridades `BAD` (1–2), `NEUTRAL` (3) y `GOOD` (4–5).
+   - **División:** Split estratificado (*train / validation / test*) preservando la distribución original y tokenización con truncamiento a 256 tokens.
+
+2. **Fine-Tuning y Comparación de Modelos:**
+   - **Baseline:** `bert-base-uncased` con *Early Stopping*.
+   - **Comparador:** `roberta-base` bajo el mismo esquema de entrenamiento y métrica de evaluación (*Macro F1*).
+   - **Veredicto:** RoBERTa superó a BERT gracias a su tokenizador BPE por bytes y eliminación de la tarea NSP, capturando mejor expresiones coloquiales y reseñas ambiguas.
+
+3. **Optimización de Hiperparámetros (Optuna):**
+   - Ajuste sistemático de *learning rate* ($1\times 10^{-5}$ a $5\times 10^{-5}$) y *batch size* ({16, 32}).
+   - El modelo reentrenado con los parámetros óptimos incrementó el *Macro F1* en el conjunto de prueba, reduciendo el error en la clase minoritaria (`NEUTRAL`).
+
+4. **Ablación de Capas (Frozen Backbone vs. Full Fine-Tuning):**
+   - Congelamiento de todas las capas del encoder excepto la última (capa 11) y el cabezal de clasificación.
+   - **Hallazgo:** Entrenar únicamente ~6.5% de los parámetros redujo el tiempo de entrenamiento a la mitad, pero disminuyó el desempeño en ~6–8% de F1. Esto demuestra la necesidad de adaptar pesos intermedios para alinear términos de sentimiento con aspectos específicos.
+
+---
+
+## 🛠️ Tecnologías Utilizadas
+- **Frameworks:** PyTorch, Hugging Face `transformers`, `datasets`, `evaluate`
+- **Optimización:** Optuna
+- **Métricas:** Scikit-Learn (`accuracy`, `macro_f1`)
+- **Entorno:** Google Colab (GPU T4)
+
+---
+
+## 💻 Comandos Git para Guardar Cambios
+
+```bash
+git add . && git commit -m "feat(nlp): complete bert & roberta aspect-based sentiment classification homework" && git push
